@@ -31,7 +31,7 @@
 - no extra scripts needed this `qb-inventory` `2.0.0` is cash item ready.
 
 # Install
-- Backup your own `qb-inventory` 2.0.0 and replace it with this `qb-inventory` 2.0.0,
+- Backup your own `qb-inventory` 2.0.0 and replace it with this `qb-inventory` 2.0.0
 - Make sure you add all your invnetory images in this inventory images folder, don't delete the cash item images.
 
 # Images are already included
