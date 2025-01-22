@@ -44,6 +44,9 @@
 ![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/black_money.png?raw=true)
 ![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/crypto.png?raw=true)
 
+# Video
+![Video](https://www.youtube.com/watch?v=-GYOfPkXM0A)
+
 # Note for using blackmoney
 - first you need to edit the qb-core/config.lua to this below add black_money to this tables
 ```lua
