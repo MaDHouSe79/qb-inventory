@@ -26,10 +26,13 @@
 - [Subscribe](https://www.youtube.com/c/@MaDHouSe79) 
 
 # qb-inventory 2.0.0
+- Edit by MaDHouSe79 so you can use cash as item.
+- you don't need `mh-cashasitem` cause this `qb-inventory` handles the items and money.
+- no extra scripts needed this `qb-inventory` `2.0.0` is cash item ready.
 
-Edit by MaDHouSe79 so you can use cash as item.
-you don't need `mh-cashasitem` cause this `qb-inventory` handles the items and money.
-no extra scripts needed this `qb-inventory` `2.0.0` is cash item ready.
+# Install
+- Backup your own `qb-inventory` 2.0.0 and replace it with this `qb-inventory` 2.0.0,
+- Make sure you add all your invnetory images in this inventory images folder, don't delete the cash item images.
 
 # Images are already included
 ![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/cash.png?raw=true)
