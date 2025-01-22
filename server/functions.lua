@@ -620,7 +620,6 @@ function OpenInventory(source, identifier, data)
 
     if not identifier then
         Player(source).state.inv_busy = true
-        print("Open Inventory")
         ResetMoneyItem(source)
         TriggerClientEvent('qb-inventory:client:openInventory', source, QBPlayer.PlayerData.items)
         return
