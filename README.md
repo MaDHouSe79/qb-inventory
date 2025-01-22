@@ -31,19 +31,19 @@ Edit by MaDHouSe79 so you can use cash as item.
 you don't need `mh-cashasitem` cause this `qb-inventory` handles the items and money.
 no extra scripts needed this `qb-inventory` `2.0.0` is cash item ready.
 
-# Images
+# Images are already included
 ![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/cash.png?raw=true)
 ![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/black_money.png?raw=true)
 ![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/crypto.png?raw=true)
 
-# Shared Items
+# QB Shared Items
 ```lua
 cash = { name = 'cash', label = 'Cash', weight = 0, type = 'item', image = 'cash.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Cash'  },
 black_money = { name = 'black_money', label = 'Black Money', weight = 0, type = 'item', image = 'black_money.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Black Money?' },
 crypto = { name = 'crypto', label = 'Crypto', weight = 0, type = 'item', image = 'crypto.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Crypto' },
 ```
 
-# Disable hub money change
+# To disable the hub money change
 - Replace this code in `qb-core/server/player.lua` around line 312
 ```lua
 function self.Functions.AddMoney(moneytype, amount, reason)
