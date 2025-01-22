@@ -507,7 +507,11 @@ RegisterNetEvent("QBCore:Server:OnMoneyChange", function(source, moneyType, amou
                     AddItem(source, moneyType, amount, reason)
                 end
             elseif set == 'remove' then
-                RemoveItem(source, moneyType, amount, reason)
+                if moneyType == 'bank' then
+                    RemoveItem(source, 'cash', amount, reason)
+                else
+                    RemoveItem(source, moneyType, amount, reason)
+                end
             end
         end
     end
