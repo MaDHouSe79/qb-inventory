@@ -699,6 +699,7 @@ exports('RemoveInventory', RemoveInventory)
 --- @param reason string (optional) The reason for adding the item.
 --- @return boolean Returns true if the item was successfully added, false otherwise.
 function AddItem(identifier, item, amount, slot, info, reason)
+    if item == "bank" then return end
     local itemInfo = QBCore.Shared.Items[item:lower()]
     if not itemInfo then
         print('AddItem: Invalid item')
@@ -814,6 +815,7 @@ exports('AddItem', AddItem)
 --- @param reason string - The reason for removing the item. Defaults to 'No reason specified' if not provided.
 --- @return boolean - Returns true if the item was successfully removed, false otherwise.
 function RemoveItem(identifier, item, amount, slot, reason)
+    if item == "bank" then return end
     if not QBCore.Shared.Items[item:lower()] then
         print('RemoveItem: Invalid item')
         return false
@@ -897,77 +899,3 @@ function RemoveItem(identifier, item, amount, slot, reason)
 end
 
 exports('RemoveItem', RemoveItem)
-
--- Set an item from a player's inventory.
---- @param identifier string - The identifier of the player.
---- @param item string - The name of the item to remove.
---- @param amount number - The amount of the item to remove.
---- @param reason string - The reason for removing the item. Defaults to 'No reason specified' if not provided.
---- @return boolean - Returns true if the item was successfully removed, false otherwise.
-function SetItem(identifier, item, amount, reason)
-    if not QBCore.Shared.Items[item:lower()] then
-        print('RemoveItem: Invalid item')
-        return false
-    end
-
-    local inventory
-    local player = QBCore.Functions.GetPlayer(identifier)
-
-    if player then
-        inventory = player.PlayerData.items
-    elseif Inventories[identifier] then
-        inventory = Inventories[identifier].items
-    elseif Drops[identifier] then
-        inventory = Drops[identifier].items
-    end
-
-    if not inventory then
-        print('RemoveItem: Inventory not found')
-        return false
-    end
-
-    local inventoryItem = nil
-    for _, invItem in pairs(inventory) do
-        if invItem.name == item then
-            inventoryItem = invItem
-            break
-        end
-    end
-
-    if not inventoryItem or inventoryItem.name:lower() ~= item:lower() then
-        print('RemoveItem: Item not found in slot')
-        return false
-    end
-
-    amount = tonumber(amount)
-    if inventoryItem.amount < amount then
-        print('RemoveItem: Not enough items in slot')
-        return false
-    end
-
-    inventoryItem.amount = amount
-
-    if player then
-        player.Functions.SetPlayerData('items', inventory)
-        if moneyTypes[item] then player.Functions.SetMoney(item, amount) end
-    end
-
-    local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
-    local removeReason = reason or 'No reason specified'
-    local resourceName = GetInvokingResource() or 'qb-inventory'
-
-    TriggerEvent(
-        'qb-log:server:CreateLog',
-        'playerinventory',
-        'Item Set',
-        'red',
-        '**Inventory:** ' .. invName .. '\n' ..
-        '**Item:** ' .. item .. '\n' ..
-        '**Amount:** ' .. amount .. '\n' ..
-        '**Reason:** ' .. removeReason .. '\n' ..
-        '**Resource:** ' .. resourceName
-    )
-    return true
-end
-
-exports('SetItem', SetItem)
