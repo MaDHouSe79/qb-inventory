@@ -784,10 +784,7 @@ function AddItem(identifier, item, amount, slot, info, reason)
 
     if player then
         player.Functions.SetPlayerData('items', inventory)
-        if item == "cash" or item == "black_money" or item == "crypto" then
-            player.Functions.AddMoney(item, amount)
-            TriggerClientEvent('qb-inventory:client:ItemBox', identifier, itemInfo, 'add', amount)
-        end
+        if item == "cash" or item == "black_money" or item == "crypto" then player.Functions.AddMoney(item, amount) end
     end
 
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
@@ -877,10 +874,7 @@ function RemoveItem(identifier, item, amount, slot, reason)
 
     if player then
         player.Functions.SetPlayerData('items', inventory)
-        if item == "cash" or item == "black_money" or item == "crypto" then
-            player.Functions.RemoveMoney(item, amount)
-            TriggerClientEvent('qb-inventory:client:ItemBox', identifier, inventoryItem, 'remove', amount)
-        end
+        if item == "cash" or item == "black_money" or item == "crypto" then player.Functions.RemoveMoney(item, amount) end
     end
 
 
@@ -955,10 +949,7 @@ function SetItem(identifier, item, amount, reason)
 
     if player then
         player.Functions.SetPlayerData('items', inventory)
-        if item == "cash" or item == "black_money" or item == "crypto" then
-            player.Functions.SetMoney(item, amount)
-            TriggerClientEvent('qb-inventory:client:ItemBox', identifier, inventoryItem, 'set', amount)
-        end
+        if item == "cash" or item == "black_money" or item == "crypto" then player.Functions.SetMoney(item, amount) end
     end
 
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
