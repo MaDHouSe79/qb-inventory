@@ -79,7 +79,6 @@ function self.Functions.AddMoney(moneytype, amount, reason)
         else
             TriggerEvent('qb-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') added, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
         end
-        TriggerClientEvent('qb-inventory:client:ItemBox', self.PlayerData.source, QBCore.Shared.Items[moneytype], 'add', amount)
         --TriggerClientEvent('hud:client:OnMoneyChange', self.PlayerData.source, moneytype, amount, false)
         TriggerClientEvent('QBCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
         TriggerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
@@ -111,7 +110,6 @@ function self.Functions.RemoveMoney(moneytype, amount, reason)
         else
             TriggerEvent('qb-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') removed, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
         end
-        TriggerClientEvent('qb-inventory:client:ItemBox', self.PlayerData.source, QBCore.Shared.Items[moneytype], 'remove', amount)
         --TriggerClientEvent('hud:client:OnMoneyChange', self.PlayerData.source, moneytype, amount, true)
         if moneytype == 'bank' then
             TriggerClientEvent('qb-phone:client:RemoveBankMoney', self.PlayerData.source, amount)
@@ -135,7 +133,6 @@ function self.Functions.SetMoney(moneytype, amount, reason)
     if not self.Offline then
         self.Functions.UpdatePlayerData()
         TriggerEvent('qb-log:server:CreateLog', 'playermoney', 'SetMoney', 'green', '**' .. GetPlayerName(self.PlayerData.source) .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. self.PlayerData.source .. ')** $' .. amount .. ' (' .. moneytype .. ') set, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
-        TriggerClientEvent('qb-inventory:client:ItemBox', self.PlayerData.source, QBCore.Shared.Items[moneytype], 'set', amount)
         --TriggerClientEvent('hud:client:OnMoneyChange', self.PlayerData.source, moneytype, math.abs(difference), difference < 0)
         TriggerClientEvent('QBCore:Client:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
         TriggerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
