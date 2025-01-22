@@ -34,7 +34,7 @@
 - Backup your own `qb-inventory` 2.0.0 and replace it with this `qb-inventory` 2.0.0
 - Make sure you add all your invnetory images in this inventory images folder, don't delete the cash item images.
 
-# Give cash
+# Use the giveitem command
 - /giveitem [id] cash [amount]
 - /giveitem [id] black_money [amount]
 - /giveitem [id] crypto [amount]
