@@ -1,4 +1,4 @@
-# qb-inventory
+# qb-inventory 2.0.0
 
 Edit by MaDHouSe79 so you can use cash as item.
 
