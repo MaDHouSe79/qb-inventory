@@ -132,7 +132,8 @@ function self.Functions.SetMoney(moneytype, amount, reason)
 end
 ```
 
-# Disable qb core money commands.
+# To disable qb-core money commands.
+- in `qb-core/server/commands.lua` around line 221
 ```lua
 QBCore.Commands.Add('givemoney', Lang:t('command.givemoney.help'), { { name = Lang:t('command.givemoney.params.id.name'), help = Lang:t('command.givemoney.params.id.help') }, { name = Lang:t('command.givemoney.params.moneytype.name'), help = Lang:t('command.givemoney.params.moneytype.help') }, { name = Lang:t('command.givemoney.params.amount.name'), help = Lang:t('command.givemoney.params.amount.help') } }, true, function(source, args)
     local Player = QBCore.Functions.GetPlayer(tonumber(args[1]))
