@@ -495,12 +495,17 @@ local function getIdentifier(inventoryId, src)
 end
 
 RegisterNetEvent("QBCore:Server:OnMoneyChange", function(source, moneyType, amount, set, reason)
+    print(source, moneyType, amount, set, reason)
     if source ~= nil then
         if reason ~= 'unknown' then
             if set == 'set' then
                 SetItem(source, moneyType, amount, reason)
             elseif set == 'add' then
-                AddItem(source, moneyType, amount, reason)
+                if moneyType == 'bank' then
+                    AddItem(source, 'cash', amount, reason)
+                else
+                    AddItem(source, moneyType, amount, reason)
+                end
             elseif set == 'remove' then
                 RemoveItem(source, moneyType, amount, reason)
             end
