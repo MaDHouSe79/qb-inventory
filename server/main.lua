@@ -68,6 +68,10 @@ AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
         return RemoveItem(Player.PlayerData.source, item, amount, slot, reason)
     end)
 
+    QBCore.Functions.AddPlayerMethod(Player.PlayerData.source, 'SetItem', function(item, amount)
+        return SetItem(Player.PlayerData.source, item, amount)
+    end)
+        
     QBCore.Functions.AddPlayerMethod(Player.PlayerData.source, 'GetItemBySlot', function(slot)
         return GetItemBySlot(Player.PlayerData.source, slot)
     end)
