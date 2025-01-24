@@ -95,6 +95,33 @@ end)
 
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
+    
+    if not QBCore.Config.Money.MoneyTypes['black_money'] then
+        print("~r~["..GetCurrentResourceName().."] - ERROR - You forgot to add 'black_money' in the 'resources/[qb]/qb-core/config.lua' file at line 9 and 10.~w~")
+    elseif QBCore.Config.Money.MoneyTypes['black_money'] then
+        MySQL.Async.fetchAll("SELECT * FROM players", function(rs)
+            for k, v in pairs(rs) do
+                local list = json.decode(v.money)
+                if not list['black_money'] then
+                    list['black_money'] = 0
+                    MySQL.update.await('UPDATE players SET money = ? WHERE citizenid = ?', { json.encode(list), v.citizenid })
+                end
+            end
+        end)
+    end
+        
+    local SharedItems = {
+        cash = { name = 'cash', label = 'Cash', weight = 0, type = 'item', image = 'cash.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Cash'  },
+        black_money = { name = 'black_money', label = 'Black Money', weight = 0, type = 'item', image = 'black_money.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Black Money' },
+        crypto = { name = 'crypto', label = 'Crypto', weight = 0, type = 'item', image = 'crypto.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Crypto' },
+    }
+    local countItems = 0
+    for _, item in pairs(SharedItems) do 
+        local added, _ = exports['qb-core']:AddItem(item.name, item)
+        if added then countItems += 1 end
+    end
+    print("Total "..countItems.." items loaded for qb-core shared items...")
+
     local Players = QBCore.Functions.GetQBPlayers()
     for k in pairs(Players) do
         QBCore.Functions.AddPlayerMethod(k, 'AddItem', function(item, amount, slot, info)
@@ -126,20 +153,6 @@ AddEventHandler('onResourceStart', function(resourceName)
         end)
 
         Player(k).state.inv_busy = false
-    end
-
-    if not QBCore.Config.Money.MoneyTypes['black_money'] then
-        print("~r~["..GetCurrentResourceName().."] - ERROR - You forgot to add 'black_money' in the 'resources/[qb]/qb-core/config.lua' file at line 9 and 10.~w~")
-    elseif QBCore.Config.Money.MoneyTypes['black_money'] then
-        MySQL.Async.fetchAll("SELECT * FROM players", function(rs)
-            for k, v in pairs(rs) do
-                local list = json.decode(v.money)
-                if not list['black_money'] then
-                    list['black_money'] = 0
-                    MySQL.update.await('UPDATE players SET money = ? WHERE citizenid = ?', { json.encode(list), v.citizenid })
-                end
-            end
-        end)
     end
 end)
 
