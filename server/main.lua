@@ -56,6 +56,10 @@ RegisterNetEvent('QBCore:Server:UpdateObject', function()
 end)
 
 AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
+    SetItem(Player.PlayerData.source, 'cash', Player.PlayerData.money.cash)
+    SetItem(Player.PlayerData.source, 'black_money', Player.PlayerData.money.black_money)
+    SetItem(Player.PlayerData.source, 'crypto', Player.PlayerData.money.crypto)
+        
     QBCore.Functions.AddPlayerMethod(Player.PlayerData.source, 'AddItem', function(item, amount, slot, info, reason)
         return AddItem(Player.PlayerData.source, item, amount, slot, info, reason)
     end)
