@@ -899,3 +899,25 @@ function RemoveItem(identifier, item, amount, slot, reason)
 end
 
 exports('RemoveItem', RemoveItem)
+
+-- Set Item from player's inventory.
+---@param identifier string - The identifier of the player.
+---@param item string - The name of the item to remove.
+---@param amount number - The amount of the item to remove.
+---@param metadata table
+---@return boolean
+function SetItem(identifier, item, amount, metadata)
+    local tmpItem = GetItemByName(identifier, item)
+    if tmpItem then
+        if amount > tmpItem.amount then
+            amount -= tmpItem.amount
+            return AddItem(identifier, tmpItem.name, amount)
+        elseif amount <= tmpItem.amount then
+            tmpItem.amount -= amount
+            return RemoveItem(identifier, tmpItem.name, tmpItem.amount)
+        end
+    else
+        return AddItem(identifier, item, amount)
+    end
+end
+exports('SetItem', SetItem)
