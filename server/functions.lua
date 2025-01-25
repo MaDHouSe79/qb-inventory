@@ -664,23 +664,7 @@ end
 
 exports('RemoveInventory', RemoveInventory)
 
-
 local moneyTypes = {['cash'] = true, ['black_money'] = true, ['crypto'] = true}
-
-function ResetMoneyItem(source)
-    local QBPlayer = QBCore.Functions.GetPlayer(source)
-    if QBPlayer then
-        local cashFound, blackFound, cryptoFound = false, false, false
-        for _, item in pairs(QBPlayer.PlayerData.items) do
-            if item.name == "cash" then cashFound = true end
-            if item.name == "black_money" then blackFound = true end
-            if item.name == "crypto" then cryptoFound = true end
-        end
-        if not cashFound then QBPlayer.Functions.SetMoney('cash', 0) end
-        if not blackFound then QBPlayer.Functions.SetMoney('black_money', 0) end
-        if not cryptoFound then QBPlayer.Functions.SetMoney('crypto', 0) end
-    end
-end
 
 --- Adds an item to the player's inventory or a specific inventory.
 --- @param identifier string The identifier of the player or inventory.
