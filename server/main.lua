@@ -56,10 +56,11 @@ RegisterNetEvent('QBCore:Server:UpdateObject', function()
 end)
 
 AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
+
     SetItem(Player.PlayerData.source, 'cash', Player.PlayerData.money.cash)
     SetItem(Player.PlayerData.source, 'black_money', Player.PlayerData.money.black_money)
     SetItem(Player.PlayerData.source, 'crypto', Player.PlayerData.money.crypto)
-        
+
     QBCore.Functions.AddPlayerMethod(Player.PlayerData.source, 'AddItem', function(item, amount, slot, info, reason)
         return AddItem(Player.PlayerData.source, item, amount, slot, info, reason)
     end)
@@ -68,10 +69,6 @@ AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
         return RemoveItem(Player.PlayerData.source, item, amount, slot, reason)
     end)
 
-    QBCore.Functions.AddPlayerMethod(Player.PlayerData.source, 'SetItem', function(item, amount)
-        return SetItem(Player.PlayerData.source, item, amount)
-    end)
-        
     QBCore.Functions.AddPlayerMethod(Player.PlayerData.source, 'GetItemBySlot', function(slot)
         return GetItemBySlot(Player.PlayerData.source, slot)
     end)
@@ -95,7 +92,7 @@ end)
 
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
-    
+
     if not QBCore.Config.Money.MoneyTypes['black_money'] then
         print("~r~["..GetCurrentResourceName().."] - ERROR - You forgot to add 'black_money' in the 'resources/[qb]/qb-core/config.lua' file at line 9 and 10.~w~")
     elseif QBCore.Config.Money.MoneyTypes['black_money'] then
@@ -109,21 +106,14 @@ AddEventHandler('onResourceStart', function(resourceName)
             end
         end)
     end
-        
-    local SharedItems = {
-        cash = { name = 'cash', label = 'Cash', weight = 0, type = 'item', image = 'cash.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Cash'  },
-        black_money = { name = 'black_money', label = 'Black Money', weight = 0, type = 'item', image = 'black_money.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Black Money' },
-        crypto = { name = 'crypto', label = 'Crypto', weight = 0, type = 'item', image = 'crypto.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Crypto' },
-    }
-    local countItems = 0
-    for _, item in pairs(SharedItems) do 
-        local added, _ = exports['qb-core']:AddItem(item.name, item)
-        if added then countItems += 1 end
-    end
-    print("Total "..countItems.." items loaded for qb-core shared items...")
-
     local Players = QBCore.Functions.GetQBPlayers()
     for k in pairs(Players) do
+
+        local tmpPlayer = QBCore.Functions.GetPlayer(k)
+        SetItem(tmpPlayer.PlayerData.source, 'cash', tmpPlayer.PlayerData.money.cash)
+        SetItem(tmpPlayer.PlayerData.source, 'black_money', tmpPlayer.PlayerData.money.black_money)
+        SetItem(tmpPlayer.PlayerData.source, 'crypto', tmpPlayer.PlayerData.money.crypto)
+
         QBCore.Functions.AddPlayerMethod(k, 'AddItem', function(item, amount, slot, info)
             return AddItem(k, item, amount, slot, info)
         end)
@@ -175,7 +165,6 @@ RegisterNetEvent('qb-inventory:server:openVending', function(data)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
-    ResetMoneyItem(src)
     CreateShop({
         name = 'vending',
         label = 'Vending Machine',
@@ -265,8 +254,7 @@ RegisterNetEvent('qb-inventory:server:useItem', function(item)
                         item.info.birthdate,
                         item.info.type
                     }
-                }
-                )
+                })
             end
         end
     else
@@ -293,7 +281,6 @@ RegisterNetEvent('qb-inventory:server:openDrop', function(dropId)
         slots = drop.slots,
         inventory = drop.items
     }
-    ResetMoneyItem(src)
     drop.isOpen = true
     TriggerClientEvent('qb-inventory:client:openInventory', source, Player.PlayerData.items, formattedInventory)
 end)
@@ -364,7 +351,6 @@ QBCore.Functions.CreateCallback('qb-inventory:server:attemptPurchase', function(
     local itemInfo = data.item
     local amount = data.amount
     local shop = string.gsub(data.shop, 'shop%-', '')
-    local price = itemInfo.price * amount
     local Player = QBCore.Functions.GetPlayer(source)
 
     if not Player then
@@ -388,14 +374,26 @@ QBCore.Functions.CreateCallback('qb-inventory:server:attemptPurchase', function(
         end
     end
 
+    if shopInfo.items[itemInfo.slot].name ~= itemInfo.name then -- Check if item name passed is the same as the item in that slot
+        cb(false)
+        return
+    end
+
+    if amount > shopInfo.items[itemInfo.slot].amount then
+        TriggerClientEvent('QBCore:Notify', source, 'Cannot purchase larger quantity than currently in stock', 'error')
+        cb(false)
+        return
+    end
+
     if not CanAddItem(source, itemInfo.name, amount) then
         TriggerClientEvent('QBCore:Notify', source, 'Cannot hold item', 'error')
         cb(false)
         return
     end
 
+    local price = shopInfo.items[itemInfo.slot].price * amount
     if Player.PlayerData.money.cash >= price then
-        Player.Functions.RemoveItem('cash', price, 'shop-purchase')
+        Player.Functions.RemoveMoney('cash', price, 'shop-purchase')
         AddItem(source, itemInfo.name, amount, nil, itemInfo.info, 'shop-purchase')
         TriggerEvent('qb-shops:server:UpdateShopItems', shop, itemInfo, amount)
         cb(true)
@@ -515,14 +513,16 @@ local function getIdentifier(inventoryId, src)
     end
 end
 
-RegisterNetEvent("QBCore:Server:OnMoneyChange", function(source, moneyType, amount, set, reason)
-    if source ~= nil and reason ~= 'unknown' then
-        if set == 'set' then
-            AddItem(source, moneyType, amount, nil, nil, reason)
-        elseif set == 'add' then
-            AddItem(source, moneyType, amount, nil, nil, reason)
-        elseif set == 'remove' then
-            RemoveItem(source, moneyType, amount, nil, nil, reason)
+RegisterNetEvent('QBCore:Server:OnMoneyChange', function(source, moneyType, amount, changeType, reason)
+    if reason == "inventory-update" then return end
+    if moneyType == "bank" then return end
+    local itemInfo = QBCore.Shared.Items[moneyType:lower()]
+    if itemInfo then
+        local item = GetItemByName(source, moneyType)
+        if item then
+            SetItem(source, moneyType, changeType == "set" and amount or changeType == "remove" and item.amount - amount or changeType == "add" and item.amount + amount)
+        elseif not item then
+            AddItem(source, moneyType, changeType == "set" and amount or changeType == "remove" and amount or changeType == "add" and amount)
         end
     end
 end)
@@ -533,19 +533,14 @@ RegisterNetEvent('qb-inventory:server:SetInventoryData', function(fromInventory,
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
-
     fromSlot, toSlot, fromAmount, toAmount = tonumber(fromSlot), tonumber(toSlot), tonumber(fromAmount), tonumber(toAmount)
-
     local fromItem = getItem(fromInventory, src, fromSlot)
     local toItem = getItem(toInventory, src, toSlot)
-
     if fromItem then
         if not toItem and toAmount > fromItem.amount then return end
         if fromInventory == 'player' and toInventory ~= 'player' then checkWeapon(src, fromItem) end
-
         local fromId = getIdentifier(fromInventory, src)
         local toId = getIdentifier(toInventory, src)
-
         if toItem and fromItem.name == toItem.name then
             if RemoveItem(fromId, fromItem.name, toAmount, fromSlot, 'stacked item') then
                 AddItem(toId, toItem.name, toAmount, toSlot, toItem.info, 'stacked item')
@@ -558,7 +553,6 @@ RegisterNetEvent('qb-inventory:server:SetInventoryData', function(fromInventory,
             if toItem then
                 local fromItemAmount = fromItem.amount
                 local toItemAmount = toItem.amount
-
                 if RemoveItem(fromId, fromItem.name, fromItemAmount, fromSlot, 'swapped item') and RemoveItem(toId, toItem.name, toItemAmount, toSlot, 'swapped item') then
                     AddItem(toId, fromItem.name, fromItemAmount, toSlot, fromItem.info, 'swapped item')
                     AddItem(fromId, toItem.name, toItemAmount, fromSlot, toItem.info, 'swapped item')
