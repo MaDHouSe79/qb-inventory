@@ -109,11 +109,6 @@ AddEventHandler('onResourceStart', function(resourceName)
     local Players = QBCore.Functions.GetQBPlayers()
     for k in pairs(Players) do
 
-        local tmpPlayer = QBCore.Functions.GetPlayer(k)
-        SetItem(tmpPlayer.PlayerData.source, 'cash', tmpPlayer.PlayerData.money.cash)
-        SetItem(tmpPlayer.PlayerData.source, 'black_money', tmpPlayer.PlayerData.money.black_money)
-        SetItem(tmpPlayer.PlayerData.source, 'crypto', tmpPlayer.PlayerData.money.crypto)
-
         QBCore.Functions.AddPlayerMethod(k, 'AddItem', function(item, amount, slot, info)
             return AddItem(k, item, amount, slot, info)
         end)
