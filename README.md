@@ -30,35 +30,28 @@
 - you don't need `mh-cashasitem` cause this `qb-inventory` handles the items and money.
 - no extra scripts needed this `qb-inventory` `2.0.0` is cash item ready.
 
-# Install
-- Backup your own `qb-inventory` 2.0.0 and replace it with this `qb-inventory` 2.0.0
-- Make sure you add all your invnetory images in this inventory images folder, don't delete the cash item images.
+# Images
+![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/cash.png?raw=true)
+![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/black_money.png?raw=true)
+![alttext](https://github.com/MaDHouSe79/mh-cashasitem/blob/main/image/crypto.png?raw=true)
 
-# Use the giveitem command
-- /giveitem [id] cash [amount]
-- /giveitem [id] black_money [amount]
-- /giveitem [id] crypto [amount]
- 
-# Video
-- [Video](https://www.youtube.com/watch?v=-GYOfPkXM0A)
-
-# QBCore Config for blackmoney
-- first you need to edit the qb-core/config.lua to this below add black_money to this tables
+# QB Shared Items
 ```lua
-QBConfig.Money.MoneyTypes = { cash = 500, bank = 5000, crypto = 0, black_money = 0 } -- type = startamount - Add or remove money types for your server (for ex. blackmoney = 0), remember once added it will not be removed from the database!
-QBConfig.Money.DontAllowMinus = { 'cash', 'crypto', 'black_money' } -- Money that is not allowed going in minus
+cash = { name = 'cash', label = 'Cash', weight = 0, type = 'item', image = 'cash.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Cash'  },
+black_money = { name = 'black_money', label = 'Black Money', weight = 0, type = 'item', image = 'black_money.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Black Money?' },
+crypto = { name = 'crypto', label = 'Crypto', weight = 0, type = 'item', image = 'crypto.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Crypto' },
 ```
 
 ## **INSTALL FOR QB HUD**
 # Add in top of qb-hud/client.lua
-- around line 15
+- Around line 15
 ```lua
 local blackAmount = 0
 local cryptoAmount = 0
 ```
 
 # Replace this code below in qb-hud/client.lua
-- around line 863
+- Around line 863
 ```lua
 RegisterNetEvent('hud:client:ShowAccounts', function(type, amount)
     if amount == nil then amount = 0 end
@@ -91,7 +84,7 @@ end)
 ```
 
 # Replace this code below in qb-hud/client.lua
-- around line 886
+- Around line 886
 ```lua
 RegisterNetEvent('hud:client:OnMoneyChange', function(type, amount, isMinus)
     cashAmount = PlayerData.money['cash']
@@ -112,7 +105,7 @@ end)
 ```
 
 # Replace this code below in qb-hud/html/app.js
-- around line 622
+- Around line 622
 ```js
 // MONEY HUD
 const moneyHud = Vue.createApp({
@@ -258,7 +251,7 @@ const moneyHud = Vue.createApp({
 ```
 
 # Add this code below in qb-hud/html/index.html
-- around line 205
+- Around line 205
 ```html
 <div id="money-cash">
     <transition name="slide-fade">
