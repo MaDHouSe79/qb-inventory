@@ -58,7 +58,6 @@ function LoadInventory(source, citizenid)
     if not inventory or not next(inventory) then return loadedInventory end
 
     for _, item in pairs(inventory) do
-
         if item then
             local itemInfo = QBCore.Shared.Items[item.name:lower()]
 
@@ -83,6 +82,7 @@ function LoadInventory(source, citizenid)
             end
         end
     end
+
     if #missingItems > 0 then
         print(('The following items were removed for player %s as they no longer exist: %s'):format(GetPlayerName(source), table.concat(missingItems, ', ')))
     end
@@ -494,23 +494,6 @@ end
 
 exports('CloseInventory', CloseInventory)
 
-local moneyTypes = {['cash'] = true, ['black_money'] = true, ['crypto'] = true}
-
-function ResetMoneyItem(source)
-    local QBPlayer = QBCore.Functions.GetPlayer(source)
-    if QBPlayer then
-        local cashFound, blackFound, cryptoFound = false, false, false
-        for _, item in pairs(QBPlayer.PlayerData.items) do
-            if item.name == "cash" then cashFound = true end
-            if item.name == "black_money" then blackFound = true end
-            if item.name == "crypto" then cryptoFound = true end
-        end
-        if not cashFound then QBPlayer.Functions.SetMoney('cash', 0) end
-        if not blackFound then QBPlayer.Functions.SetMoney('black_money', 0) end
-        if not cryptoFound then QBPlayer.Functions.SetMoney('crypto', 0) end
-    end
-end
-
 -- Opens the inventory of a player by their ID.
 --- @param source number - The player's server ID.
 --- @param targetId number - The ID of the player whose inventory will be opened.
@@ -521,8 +504,6 @@ function OpenInventoryById(source, targetId)
     if Player(targetId).state.inv_busy then CloseInventory(targetId) end
     local playerItems = QBPlayer.PlayerData.items
     local targetItems = TargetPlayer.PlayerData.items
-    ResetMoneyItem(source)
-    ResetMoneyItem(targetId)
     local formattedInventory = {
         name = 'otherplayer-' .. targetId,
         label = GetPlayerName(targetId),
@@ -530,7 +511,6 @@ function OpenInventoryById(source, targetId)
         slots = Config.MaxSlots,
         inventory = targetItems
     }
-
     Wait(1500)
     Player(targetId).state.inv_busy = true
     TriggerClientEvent('qb-inventory:client:openInventory', source, playerItems, formattedInventory)
@@ -598,7 +578,6 @@ function OpenShop(source, name)
             if distance > 5.0 then return end
         end
     end
-    ResetMoneyItem(source)
     local formattedInventory = {
         name = 'shop-' .. RegisteredShops[name].name,
         label = RegisteredShops[name].label,
@@ -621,7 +600,6 @@ function OpenInventory(source, identifier, data)
 
     if not identifier then
         Player(source).state.inv_busy = true
-        ResetMoneyItem(source)
         TriggerClientEvent('qb-inventory:client:openInventory', source, QBPlayer.PlayerData.items)
         return
     end
@@ -644,7 +622,6 @@ function OpenInventory(source, identifier, data)
     inventory.label = (data and data.label) or (inventory and inventory.label) or identifier
     inventory.isOpen = source
 
-
     local formattedInventory = {
         name = identifier,
         label = inventory.label,
@@ -652,9 +629,6 @@ function OpenInventory(source, identifier, data)
         slots = inventory.slots,
         inventory = inventory.items
     }
-
-    ResetMoneyItem(source)
-    ResetMoneyItem(identifier)
     TriggerClientEvent('qb-inventory:client:openInventory', source, QBPlayer.PlayerData.items, formattedInventory)
 end
 
@@ -690,6 +664,24 @@ end
 
 exports('RemoveInventory', RemoveInventory)
 
+
+local moneyTypes = {['cash'] = true, ['black_money'] = true, ['crypto'] = true}
+
+function ResetMoneyItem(source)
+    local QBPlayer = QBCore.Functions.GetPlayer(source)
+    if QBPlayer then
+        local cashFound, blackFound, cryptoFound = false, false, false
+        for _, item in pairs(QBPlayer.PlayerData.items) do
+            if item.name == "cash" then cashFound = true end
+            if item.name == "black_money" then blackFound = true end
+            if item.name == "crypto" then cryptoFound = true end
+        end
+        if not cashFound then QBPlayer.Functions.SetMoney('cash', 0) end
+        if not blackFound then QBPlayer.Functions.SetMoney('black_money', 0) end
+        if not cryptoFound then QBPlayer.Functions.SetMoney('crypto', 0) end
+    end
+end
+
 --- Adds an item to the player's inventory or a specific inventory.
 --- @param identifier string The identifier of the player or inventory.
 --- @param item string The name of the item to add.
@@ -699,7 +691,6 @@ exports('RemoveInventory', RemoveInventory)
 --- @param reason string (optional) The reason for adding the item.
 --- @return boolean Returns true if the item was successfully added, false otherwise.
 function AddItem(identifier, item, amount, slot, info, reason)
-    if item == "bank" then return end
     local itemInfo = QBCore.Shared.Items[item:lower()]
     if not itemInfo then
         print('AddItem: Invalid item')
@@ -734,15 +725,17 @@ function AddItem(identifier, item, amount, slot, info, reason)
     end
 
     amount = tonumber(amount) or 1
-
     local updated = false
-
+    local updateamount = 0
+    local tmpitem = nil
     if not itemInfo.unique then
         slot = slot or GetFirstSlotByItem(inventory, item)
         if slot then
             for _, invItem in pairs(inventory) do
                 if invItem.slot == slot then
                     invItem.amount = invItem.amount + amount
+                    updateamount = invItem.amount
+                    tmpitem =  invItem.name
                     updated = true
                     break
                 end
@@ -772,7 +765,8 @@ function AddItem(identifier, item, amount, slot, info, reason)
             slot = slot,
             combinable = itemInfo.combinable
         }
-
+        updateamount = inventory[slot].amount
+        tmpitem = inventory[slot].name
         if itemInfo.type == 'weapon' then
             if not inventory[slot].info.serie then
                 inventory[slot].info.serie = tostring(QBCore.Shared.RandomInt(2) .. QBCore.Shared.RandomStr(3) .. QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(4))
@@ -785,7 +779,7 @@ function AddItem(identifier, item, amount, slot, info, reason)
 
     if player then
         player.Functions.SetPlayerData('items', inventory)
-        if moneyTypes[item] then player.Functions.AddMoney(item, amount) end
+        if moneyTypes[item] then player.Functions.AddMoney(item, amount, 'inventory-update') end
     end
 
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
@@ -815,8 +809,8 @@ exports('AddItem', AddItem)
 --- @param reason string - The reason for removing the item. Defaults to 'No reason specified' if not provided.
 --- @return boolean - Returns true if the item was successfully removed, false otherwise.
 function RemoveItem(identifier, item, amount, slot, reason)
-    if item == "bank" then return end
-    if not QBCore.Shared.Items[item:lower()] then
+    local itemInfo = QBCore.Shared.Items[item:lower()]
+    if not itemInfo then
         print('RemoveItem: Invalid item')
         return false
     end
@@ -867,7 +861,6 @@ function RemoveItem(identifier, item, amount, slot, reason)
     end
 
     inventoryItem.amount = inventoryItem.amount - amount
-
     if inventoryItem.amount <= 0 then
         inventory[itemKey] = nil
     else
@@ -876,9 +869,8 @@ function RemoveItem(identifier, item, amount, slot, reason)
 
     if player then
         player.Functions.SetPlayerData('items', inventory)
-        if moneyTypes[item] then player.Functions.RemoveMoney(item, amount) end
+        if moneyTypes[item] then player.Functions.RemoveMoney(item, amount, 'inventory-update') end
     end
-
 
     local invName = player and GetPlayerName(identifier) .. ' (' .. identifier .. ')' or identifier
     local removeReason = reason or 'No reason specified'
@@ -900,13 +892,13 @@ end
 
 exports('RemoveItem', RemoveItem)
 
+
 -- Set Item from player's inventory.
 ---@param identifier string - The identifier of the player.
 ---@param item string - The name of the item to remove.
 ---@param amount number - The amount of the item to remove.
----@param metadata table
 ---@return boolean
-function SetItem(identifier, item, amount, metadata)
+function SetItem(identifier, item, amount)
     local tmpItem = GetItemByName(identifier, item)
     if tmpItem then
         if amount > tmpItem.amount then
@@ -916,8 +908,12 @@ function SetItem(identifier, item, amount, metadata)
             tmpItem.amount -= amount
             return RemoveItem(identifier, tmpItem.name, tmpItem.amount)
         end
-    else
-        return AddItem(identifier, item, amount)
     end
 end
-exports('SetItem', SetItem)
+
+
+function GetInventory(identifier)
+    return Inventories[identifier]
+end
+
+exports('GetInventory', GetInventory)
