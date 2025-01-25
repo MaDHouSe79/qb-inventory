@@ -564,7 +564,9 @@ end)
 
 QBCore.Functions.CreateCallback('qb-inventory:server:HasWeaponInInventory', function(source, cb, WeaponInfo)
     local src = source
-    if not IsPlayerAceAllowed(src, 'admin') or IsPlayerAceAllowed(src, 'command') then
+    if IsPlayerAceAllowed(src, 'admin') or IsPlayerAceAllowed(src, 'command') then
+        cb(true)
+    elseif not IsPlayerAceAllowed(src, 'admin') or IsPlayerAceAllowed(src, 'command') then
         local hasWeapon = false
         local Player = QBCore.Functions.GetPlayer(src)
 
