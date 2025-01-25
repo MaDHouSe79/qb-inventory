@@ -324,12 +324,11 @@ RegisterKeyMapping('toggleHotbar', Lang:t('inf_mapping.tog_slots'), 'keyboard', 
 CreateThread(function()
     while true do
         Wait(5000)
-        local ped = PlayerPedId()
-        local CurrentWeapon = GetSelectedPedWeapon(ped)
+        local CurrentWeapon = GetSelectedPedWeapon(PlayerPedId())
         local WeaponInformation = QBCore.Shared.Weapons[CurrentWeapon]
         if WeaponInformation ~= nil and WeaponInformation["name"] ~= "weapon_unarmed" then
             QBCore.Functions.TriggerCallback('qb-inventory:server:HasWeaponInInventory', function(HasWeapon)
-                if not HasWeapon then SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true) end
+                if not HasWeapon then SetCurrentPedWeapon(PlayerPedId(), `WEAPON_UNARMED`, true) end
             end, WeaponInformation)
         end
     end
