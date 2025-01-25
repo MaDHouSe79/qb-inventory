@@ -726,16 +726,13 @@ function AddItem(identifier, item, amount, slot, info, reason)
 
     amount = tonumber(amount) or 1
     local updated = false
-    local updateamount = 0
-    local tmpitem = nil
+
     if not itemInfo.unique then
         slot = slot or GetFirstSlotByItem(inventory, item)
         if slot then
             for _, invItem in pairs(inventory) do
                 if invItem.slot == slot then
                     invItem.amount = invItem.amount + amount
-                    updateamount = invItem.amount
-                    tmpitem =  invItem.name
                     updated = true
                     break
                 end
@@ -765,8 +762,7 @@ function AddItem(identifier, item, amount, slot, info, reason)
             slot = slot,
             combinable = itemInfo.combinable
         }
-        updateamount = inventory[slot].amount
-        tmpitem = inventory[slot].name
+
         if itemInfo.type == 'weapon' then
             if not inventory[slot].info.serie then
                 inventory[slot].info.serie = tostring(QBCore.Shared.RandomInt(2) .. QBCore.Shared.RandomStr(3) .. QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(4))
