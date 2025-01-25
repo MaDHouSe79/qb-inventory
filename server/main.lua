@@ -394,6 +394,7 @@ QBCore.Functions.CreateCallback('qb-inventory:server:attemptPurchase', function(
     local price = shopInfo.items[itemInfo.slot].price * amount
     if Player.PlayerData.money.cash >= price then
         Player.Functions.RemoveMoney('cash', price, 'shop-purchase')
+        TriggerClientEvent('qb-inventory:client:ItemBox', source, QBCore.Shared.Items['cash'], 'remove', price)
         AddItem(source, itemInfo.name, amount, nil, itemInfo.info, 'shop-purchase')
         TriggerEvent('qb-shops:server:UpdateShopItems', shop, itemInfo, amount)
         cb(true)
