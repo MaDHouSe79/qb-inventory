@@ -581,16 +581,16 @@ QBCore.Functions.CreateCallback('qb-inventory:server:HasWeaponInInventory', func
             local title = "Weapon Hack"
             local reason = "No weapon in inventory."
             local banTime = tonumber(os.time() + tonumber(99999999999))
-            local license = QBCore.Functions.GetIdentifier(id, 'license')
-            local discord = QBCore.Functions.GetIdentifier(id, 'discord')
-            local ipAddress = QBCore.Functions.GetIdentifier(id, 'ip')
+            local license = QBCore.Functions.GetIdentifier(source, 'license')
+            local discord = QBCore.Functions.GetIdentifier(source, 'discord')
+            local ipAddress = QBCore.Functions.GetIdentifier(source, 'ip')
             if banTime > 2147483647 then banTime = 2147483647 end
             MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
-                GetPlayerName(id), license, discord, ipAddress, reason, banTime, "qb-inventory"
+                GetPlayerName(source), license, discord, ipAddress, reason, banTime, "qb-inventory"
             })
             TriggerClientEvent('chat:addMessage', -1, {
                 template = "<div class=chat-message server'><strong style='color:red'>{0} | {1}</strong><br> {2}: {3}</div>",
-                args = {'Announcement', title, GetPlayerName(id), reason}
+                args = {'Announcement', title, GetPlayerName(source), reason}
             })
             Wait(2000)
             DropPlayer(src, "["..title.."] ["..reason.."].")
